@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Sorteie Aqui</title>
+</head>
+<body>
+    <div class="backgroundImage">
+        <div class="contadorComentarios">
+            <h5>Quantidade de comentários: <span id="quantidadeComentarios"></span></h5>
+            <h5 id="numeroComentarios"></h5>
+        </div>
+        <div class="Ganhador">
+            <h2>Ganhador: <span id="ganhador"></span></h2>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>Sorteio</h1>
+    </div>
+
+    <div class="inputs">
+        <label for="urlSorteio">URL da postagem oficial do sorteio</label>
+        <input type="url" name="urlSorteio" id="urlSorteio" required>
+    </div>
+    
+    <div class="actions">
+        <button id="btnSortear" class="active">
+            <p id="activeSorteio">Sortear</p>
+        </button>
+    </div>
+
+    <!-- Animação de carregamento -->
+    <div id="loading" class="loading" style="display:none;">
+        <p class="tituloloading">Carregando...</p>
+        <div class="spinner"></div>
+    </div>
+    <script>
+        document.getElementById('btnSortear').addEventListener('click', async function () {
+            const urlSorteio = document.getElementById('urlSorteio').value;
+
+            if (!urlSorteio) {
+                alert('Por favor, forneça a URL do sorteio!');
+                return;
+            }
+
+            // Exibir o spinner de carregamento
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                // Enviar uma requisição para o servidor com configuração CORS
+                const response = await fetch(`http://localhost:3000/sortear?urlSorteio=${encodeURIComponent(urlSorteio)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('quantidadeComentarios').textContent = data.quantidadeComentarios;
+                    document.getElementById('ganhador').textContent = data.randomComment;
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Erro ao realizar o sorteio.');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar sorteio:', error);
+                alert('Erro ao realizar o sorteio.');
+            } finally {
+                // Ocultar o spinner de carregamento
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
